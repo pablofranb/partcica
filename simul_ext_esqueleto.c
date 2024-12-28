@@ -73,7 +73,11 @@ int main()
 		printf("Funcion directorio\n");
         	    continue;
             }
-         
+	 if (strcmp(orden, "info") == 0) {
+        	LeeSuperBloque(&ext_superblock);
+      		  printf("Funcion info\n");
+        	continue;
+    		}         
          // Escritura de metadatos en comandos rename, remove, copy     
          Grabarinodosydirectorio(directorio,&ext_blq_inodos,fent);
          GrabarByteMaps(&ext_bytemaps,fent);
@@ -116,7 +120,15 @@ void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos){
 		}
 }
 
-
+void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *psup) //LeeSuperBloque: Muestra información sobre la partición (tamaño, inodos libres, bloques libres, etc.).
+{
+        printf("Bloques libres = %d\n", psup -> s_free_blocks_count);
+    printf("inodos libres = %d\n", psup -> s_free_inodes_count);
+    printf("Bloques partición = %d\n", psup -> s_blocks_count);
+	printf("Bloque %d Bytes\n", psup -> s_block_size);
+    printf("inodos partición = %d\n", psup -> s_inodes_count);
+    printf("Primer bloque de datos = %d\n", psup -> s_first_data_block);
+}
 // Función para grabar inodos y directorio
 void Grabarinodosydirectorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, FILE *fich) {
     // Implementación de la función
