@@ -89,7 +89,15 @@ int main()
         Renombrar(directorio, argumento1, argumento2);
 	printf("Funcion rename\n");
 	continue;        
-	}	
+	}
+
+
+	if (strcmp(orden, "copy") == 0) {
+        Copiar(directorio, &ext_blq_inodos, &ext_bytemaps, &ext_superblock, &memdatos, argumento1, argumento2, fent);
+        printf("Funcion rename\n");
+        continue;        
+        }
+	
      
          Grabarinodosydirectorio(directorio,&ext_blq_inodos,fent);
          GrabarByteMaps(&ext_bytemaps,fent);
@@ -218,3 +226,96 @@ return;
 
 }
  
+int Copiar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
+           EXT_BYTE_MAPS *ext_bytemaps, EXT_SIMPLE_SUPERBLOCK *ext_superblock,
+           EXT_DATOS *memdatos, char *nombreorigen, char *nombredestino,  FILE *fich){
+
+int inodo_origen = -1;
+
+ for (int i = 0; i < 20; i++) { 
+        if (strcmp(directorio[i].dir_nfich, nombreorigen) == 0) {
+            inodo_origen = directorio[i].dir_inodo;
+            break;
+        }
+ 	if (strcmp(directorio[i].dir_nfich, nombredestino) == 0) {
+            printf("Error: Ya existe un archivo con ese nombre.\n");
+            return -1;
+        }  
+ }
+
+    if (inodo_origen == -1) {
+        printf("Error: El archivo origen no existe.\n");
+        return -1;
+    }
+
+
+int inodo_libre;
+
+for (int i = 2; i < MAX_INODOS; i++) {  // Los inodos 0 y 1 están reservados
+        if (ext_bytemaps->bmap_inodos[i] == 0) {
+            inodo_libre = i;
+        }else{
+	inodo_libre = -1;
+	}
+}
+
+    if (inodo_libre == -1) {
+        printf("Error: No hay inodos libres.\n");
+        return -1;
+    }
+
+int bloques_libre[MAX_NUMS_BLOQUE_INODO];
+ for (int i = 0; i < MAX_NUMS_BLOQUE_INODO; i++) {
+ 	for (int j = 4; j < 100; j++) {  // Bloques 0, 1, 2, 3 están reservados
+        	if (ext_bytemaps->bmap_bloques[j] == 0) {
+            	bloques_libre[i] = j;
+        	}else{
+		bloques_libre[i] = -1;
+		}
+	}
+
+
+        if (bloques_libre[i] == -1) {
+            printf("Error: No hay bloques libres suficientes.\n");
+            return -1;
+        }//marcados como ocupado
+        ext_bytemaps->bmap_bloques[bloques_libre[i]] = 1;
+    }
+
+
+ 	EXT_SIMPLE_INODE inodo_origen_struct = inodos[inodo_origen];
+    	EXT_SIMPLE_INODE inodo_destino_struct;
+    	inodo_destino_struct.size_fichero = inodo_origen_struct.size_fichero;
+
+	for (int i = 0; i < 7; i++) {
+        	if (inodo_origen_struct.i_nbloque[i] != NULL_BLOQUE) {
+
+		fseek(fich, inodo_origen_struct.i_nbloque[i] * SIZE_BLOQUE, SEEK_SET); 
+    		fread(memdatos->dato, sizeof(char), SIZE_BLOQUE, fich);  
+
+   
+    		fseek(fich, bloques_libre[i] * SIZE_BLOQUE, SEEK_SET);  
+		fwrite(memdatos->dato, sizeof(char), SIZE_BLOQUE, fich); 
+
+
+            	inodo_destino_struct.i_nbloque[i] = bloques_libre[i];
+        	} else {
+            	inodo_destino_struct.i_nbloque[i] = NULL_BLOQUE;
+        	}
+    	}
+
+	inodos[inodo_libre] = inodo_destino_struct;
+    	ext_bytemaps->bmap_inodos[inodo_libre] = 1;
+
+	for (int i = 0; i < MAX_FICHEROS; i++) {
+    	    if (directorio[i].dir_inodo == NULL_BLOQUE) { 
+    	        strcpy(directorio[i].dir_nfich, nombredestino);
+    	        directorio[i].dir_inodo = inodo_libre;
+    	        break;
+    	    }
+    	}
+
+    	printf("Archivo copiado exitosamente.\n");
+   	 return 0;
+
+}
