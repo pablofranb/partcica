@@ -5,14 +5,14 @@
 #include <stdlib.h>
 #define LONGITUD_COMANDO 100
 
+
 void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps);
 int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argumento2);
 void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *psup);
 int BuscaFich(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, 
               char *nombre);
 void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos);
-int Renombrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, 
-              char *nombreantiguo, char *nombrenuevo);
+void  Renombrar(EXT_ENTRADA_DIR *directorio, char *nombreantiguo, char *nombrenuevo);
 int Imprimir(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, 
              EXT_DATOS *memdatos, char *nombre);
 int Borrar(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos,
@@ -78,7 +78,15 @@ int main()
       		  printf("Funcion info\n");
         	continue;
     		}         
-         // Escritura de metadatos en comandos rename, remove, copy     
+         // Escritura de metadatos en comandos rename, remove, copy
+
+
+	if (strcmp(orden, "rename") == 0) {
+        Renombrar(directorio, &ext_blq_inodos, argumento1, argumento2);
+	printf("Funcion rename\n");
+	continue;        
+	}	
+     
          Grabarinodosydirectorio(directorio,&ext_blq_inodos,fent);
          GrabarByteMaps(&ext_bytemaps,fent);
          GrabarSuperBloque(&ext_superblock,fent);
@@ -147,4 +155,44 @@ void GrabarSuperBloque(EXT_SIMPLE_SUPERBLOCK *ext_superblock, FILE *fich) {
 // Función para grabar los datos
 void GrabarDatos(EXT_DATOS *memdatos, FILE *fich) {
     // Implementación de la función
+}
+
+
+//funcion para cambiar el nombre de ficheros
+void  Renombrar(EXT_ENTRADA_DIR *directorio, char *nombreantiguo, char *nombrenuevo){
+	//Implementación de la funcion
+
+	int coin_origen = -1; //variable para saber sis e ha encontrado el nombre de origen
+	int nombre_existente = 0;//variable para saber si un nombre ya existe
+
+	if(strlen(nombrenuevo) == 0){
+		printf("ERROR : El nombre esta vacio\n");
+		return;
+	}
+ 	
+	for(int i = 0; i < MAX_FICHEROS; i++){
+		if (strcmp(directorio[i].dir_nfich, nombreantiguo) == 0) {
+        	coin_origen = i;
+        	break;
+        	}
+		if (strcmp(directorio[i].dir_nfich, nombrenuevo) == 0) {
+         	 nombre_duplicado = 1;
+        	break;
+        	}
+	}
+
+  if (coin_origen == -1) {
+        printf("Error: El fichero '%s' no existe en el directorio.\n", nombreantiguo);
+        return;
+    }
+ if (nombre_existente) {
+        printf("Error: El nombre '%s' ya está siendo utilizado.\n", nombrenuevo);
+        return;
+    }
+
+strcpy(directorio[coin_origen].dir_nfich, nombrenuevo);
+printf("Fichero renombrado de '%s' a '%s'.\n", nombreantiguo, nombrenuevo);
+return;
+
+
 }
