@@ -191,11 +191,9 @@ void  Renombrar(EXT_ENTRADA_DIR *directorio, char *nombreantiguo, char *nombrenu
 	for(int i = 0; i < MAX_FICHEROS; i++){
 		if (strcmp(directorio[i].dir_nfich, nombreantiguo) == 0) {
         	coin_origen = i;
-        	break;
         	}
 		if (strcmp(directorio[i].dir_nfich, nombrenuevo) == 0) {
          	 nombre_existente= 1;
-        	break;
         	}
 	}
 
@@ -214,3 +212,4 @@ return;
 
 
 }
+ 
