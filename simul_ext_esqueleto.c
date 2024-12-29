@@ -122,12 +122,17 @@ int ComprobarComando(char *strcomando, char *orden, char *argumento1, char *argu
 }
 void Directorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos){
 		printf("Directorio de archivos:\n");
-   		 printf("Nombre de archivo       Tamaño (bytes)\n");
-    		printf("----------------------  --------------\n");
+   		printf("Nombre de archivo       Tamaño (bytes)     Inodo     Bloques\n");
+    		printf("----------------------  --------------	----------  ---------\n");
 		for(int i=0;i<MAX_FICHEROS;i++){
 		if(directorio[i].dir_inodo!=NULL_INODO){
-		 printf("%-22s %14u\n", directorio[i].dir_nfich,inodos->blq_inodos[i].size_fichero); //obtenemos el nombre del fichero con 22 caracteres a la izquierda y su tamaño
-
+		printf("%-22s %14u %11d    ", directorio[i].dir_nfich,inodos->blq_inodos[i].size_fichero, directorio[i].dir_inodo); //obtenemos el nombre del fichero con 22 caracteres a la izquierda y su tamaño
+		 for (int j = 0; j < MAX_NUMS_BLOQUE_INODO; j++) {
+        		if (inodos->blq_inodos[i].i_nbloque[j] != NULL_BLOQUE) {
+            		printf("%2d ",inodos->blq_inodos[i].i_nbloque[j]);
+        		}
+    		}
+    		printf("\n");
 		}
 		}
 }
