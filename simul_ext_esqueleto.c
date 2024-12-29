@@ -80,9 +80,13 @@ int main()
     		}         
          // Escritura de metadatos en comandos rename, remove, copy
 
-
+	if (strcmp(orden, "bytemaps") == 0) {
+        Printbytemaps(&ext_bytemaps);
+        printf("Funcion bytemaps");
+        continue;
+    }
 	if (strcmp(orden, "rename") == 0) {
-        Renombrar(directorio, &ext_blq_inodos, argumento1, argumento2);
+        Renombrar(directorio, argumento1, argumento2);
 	printf("Funcion rename\n");
 	continue;        
 	}	
@@ -137,6 +141,20 @@ void LeeSuperBloque(EXT_SIMPLE_SUPERBLOCK *psup) //LeeSuperBloque: Muestra infor
     printf("inodos partición = %d\n", psup -> s_inodes_count);
     printf("Primer bloque de datos = %d\n", psup -> s_first_data_block);
 }
+void Printbytemaps(EXT_BYTE_MAPS *ext_bytemaps) {
+    printf("Mapa de bits de bloques:\n");
+    for (int i = 0; i < MAX_BLOQUES_PARTICION; i++) {
+        printf("%d", ext_bytemaps->bmap_bloques[i]);
+        if ((i + 1) % 8 == 0) printf(" "); // Espaciado cada 8 bits
+    }
+    printf("\n");
+
+    printf("Mapa de bits de inodos:\n");
+    for (int i = 0; i < MAX_INODOS; i++) {
+        printf("%d", ext_bytemaps->bmap_inodos[i]);
+        if ((i + 1) % 8 == 0) printf(" "); // Espaciado cada 8 bits
+    }
+}
 // Función para grabar inodos y directorio
 void Grabarinodosydirectorio(EXT_ENTRADA_DIR *directorio, EXT_BLQ_INODOS *inodos, FILE *fich) {
     // Implementación de la función
@@ -176,7 +194,7 @@ void  Renombrar(EXT_ENTRADA_DIR *directorio, char *nombreantiguo, char *nombrenu
         	break;
         	}
 		if (strcmp(directorio[i].dir_nfich, nombrenuevo) == 0) {
-         	 nombre_duplicado = 1;
+         	 nombre_existente= 1;
         	break;
         	}
 	}
